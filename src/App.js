@@ -6,7 +6,7 @@ import {TodoList} from './components/TodoList';
 import {addTodo, generateId, findById, toggleTodo, updateTodo, removeTodo, filterTodos} from './lib/todoHelpers';
 import {Footer} from './components/Footer';
 import PropTypes from 'prop-types'; 
-import {loadTodos, createTodo} from './lib/todoService';
+import {loadTodos, createTodo, saveTodo, destroyTodo} from './lib/todoService';
 
 class App extends Component {
 
@@ -34,6 +34,8 @@ class App extends Component {
 	handleRemove = (id) => {
 		const updatedTodos = removeTodo(this.state.todos, id)
 		this.setState({todos: updatedTodos})
+		destroyTodo(id)
+			.then(() => this.showTempMessage('Task Removed'))
 	}
 
 	handleToggle = (id) => {
@@ -55,9 +57,13 @@ class App extends Component {
 			errorMessage: ''
 		})
 		createTodo(newTodo)
-			.then(() => console.log('todo added'))
+			.then(() => this.showTempMessage('Todo Added'))
 	}
 
+	showTempMessage = (msg) => {
+		this.setState({message: msg})
+		setTimeout(() => this.setState({message: ''}), 2500)
+	}
 	handleEmptySubmit(e) {
 		e.preventDefault()
 		this.setState({
@@ -81,6 +87,7 @@ class App extends Component {
         </div>
 		<div className="todo-app">
 			{this.state.errorMessage && <span className="error">{this.state.errorMessage}</span>}
+			{this.state.message && <span className="success">{this.state.message}</span>}
 			<TodoForm handleInputChange={this.handleInputChange} currentTodo={this.state.currentTodo} handleSubmit={submitHandler} />
 			<TodoList handleToggle={this.handleToggle} todos={displayTodos}
 			handleRemove={this.handleRemove}/>
