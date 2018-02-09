@@ -7,9 +7,6 @@ export const TodoList = (props) => {
 				<ul>
                     {props.todos.map(todo => <TodoItem handleToggle={props.handleToggle} key={todo.id} {...todo} handleRemove={props.handleRemove} />)}	
                 </ul>
-                <div><br/><br/>
-                    <span>Note: hover over an item to remove!</span>
-                </div>
             </div>  
     )
 }

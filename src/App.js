@@ -3,7 +3,10 @@ import logo from './logo.svg';
 import './App.css';
 import {TodoForm} from './components/TodoForm';
 import {TodoList} from './components/TodoList';
-import {addTodo, generateId, findById, toggleTodo, updateTodo, removeTodo} from './lib/todoHelpers'
+import {addTodo, generateId, findById, toggleTodo, updateTodo, removeTodo, filterTodos} from './lib/todoHelpers';
+import {Footer} from './components/Footer';
+import PropTypes from 'prop-types'; 
+import {loadTodos, createTodo} from './lib/todoService';
 
 class App extends Component {
 
@@ -11,11 +14,7 @@ class App extends Component {
 		super();
 		// set initial state- an array with multiple todo objects
 		this.state = {
-			todos: [
-				{id: 1, name: 'Learn JSX', isComplete: false},
-                {id: 2, name: 'Build an Awesome App', isComplete: false},
-                {id: 3, name: 'Ship It', isComplete: false}
-			],
+			todos: [],
 			currentTodo: ""
 		}
 		// bind methods
@@ -24,8 +23,15 @@ class App extends Component {
 		this.handleEmptySubmit = this.handleEmptySubmit.bind(this);
 	}
 
+	static contextTypes = {
+		route: PropTypes.string
+	}
+
+	componentDidMount() {
+		loadTodos()
+			.then(todos => this.setState({todos}))
+	}
 	handleRemove = (id) => {
-		
 		const updatedTodos = removeTodo(this.state.todos, id)
 		this.setState({todos: updatedTodos})
 	}
@@ -48,6 +54,8 @@ class App extends Component {
 			currentTodo: '',
 			errorMessage: ''
 		})
+		createTodo(newTodo)
+			.then(() => console.log('todo added'))
 	}
 
 	handleEmptySubmit(e) {
@@ -64,6 +72,7 @@ class App extends Component {
 	}
   render() {
 	const submitHandler = this.state.currentTodo ? this.handleSubmit : this.handleEmptySubmit;
+	const displayTodos = filterTodos(this.state.todos, this.context.route)
     return (
       <div className="app">
         <div className="app-header">
@@ -73,8 +82,9 @@ class App extends Component {
 		<div className="todo-app">
 			{this.state.errorMessage && <span className="error">{this.state.errorMessage}</span>}
 			<TodoForm handleInputChange={this.handleInputChange} currentTodo={this.state.currentTodo} handleSubmit={submitHandler} />
-			<TodoList handleToggle={this.handleToggle} todos={this.state.todos}
+			<TodoList handleToggle={this.handleToggle} todos={displayTodos}
 			handleRemove={this.handleRemove}/>
+			<Footer />
         </div>
       </div>
     );
